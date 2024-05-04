@@ -45,36 +45,22 @@ def monitor_executables_directory(downloads_dir, blacklist):
                             files_dict[file_name] = current_hash
                             if check_blacklist(current_hash, blacklist):
                                 print(f"Warning: File '{file_name}' is a potential Cryptojacking executable.")
+                                #delte reported file from folder
+                                os.remove(file_path)
 
-        for root, dirs, files in os.walk(downloads_dir):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                if os.path.isfile(file_path) and file_name.endswith('.zip'):
-                    
-                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                        zip_ref.extractall(root)
-                        for zip_file_name in zip_ref.namelist():
-                            if zip_file_name.endswith('.exe'):
-                                zip_file_path = os.path.join(root, zip_file_name)
-                                if zip_file_name not in files_dict:
-                                    print(f"New executable detected in zip file: {zip_file_name}")
-                                    hash_value = compute_hash(zip_file_path)
-                                    files_dict[zip_file_name] = hash_value
-                                    if check_blacklist(hash_value, blacklist):
-                                        print(f"Warning: File '{zip_file_name}' is a potential Cryptojacking executable.")
-                                else:
-                                    current_hash = compute_hash(zip_file_path)
-                                    if current_hash != files_dict[zip_file_name]:
-                                        print(f"Hash mismatch for executable in zip file: {zip_file_name}")
-                                        print(f"Old Hash: {files_dict[zip_file_name]}")
-                                        print(f"New Hash: {current_hash}")
-                                        files_dict[zip_file_name] = current_hash
-                                        if check_blacklist(current_hash, blacklist):
-                                            print(f"Warning: File '{zip_file_name}' is a potential Cryptojacking executable.")
+
+        
 
         time.sleep(10)  # Check every 10 seconds
-
+def get_downloads_folder():
+    # Get the user's home directory
+    home_directory = os.path.expanduser("~")
+    
+    # Construct the Downloads folder path
+    downloads_folder = os.path.join(home_directory, "Downloads")
+    
+    return downloads_folder
 # Usage example:
-downloads_directory = r'C:\Users\jacks\Downloads'
+downloads_directory = get_downloads_folder()
 blacklist = 'blacklist.txt'
 monitor_executables_directory(downloads_directory, blacklist)
